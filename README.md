@@ -3,13 +3,16 @@
 _Copyright (C) 2026, muman.ch + github.com/mumanchu_ \
 _Released under the terms of the BSD 3-Clause License_
 
-There are two versions of this board. The "MR24BSD1" is the Seeed Studio version, and the "R24BBD1" is the (original?) MicRadar version. The Seeed Studio manual has the MicRadar model number 'R24BBD1' on its cover, so I guess they are the same board. (They may contain different firmware, but I'm still waiting for my genuine MicRadar board to arrive.)
+There are two versions of this board. The "MR24BSD1" is the Seeed Studio version, and the "R24BBD1" is the original MicRadar version. The Seeed Studio manual has the MicRadar model number 'R24BBD1' on its cover, so I guess they are the same board. (They may contain different firmware, but I'm still waiting for my genuine MicRadar board to arrive.)
 
 <img height="500" alt="R24 mmWave boards" src="images/R24-boards.jpg" />
 
-These mmWave boards are not only for presence detection. They have a large radar array which is sensitive enough to measure breathing and heartbeats. If mounted above or below a bed, it will tell you if the bed is occupied, if the occupant is breathing and (hopefully) if (s)he still has a heartbeat. I assume it will also work if you are reclining on the sofa (extensive testing is in progress :-)
+These mmWave boards are not only for presence detection. They have large radar arrays which are sensitive enough to measure breathing and heartbeats. If mounted above or below a bed, it will tell you if the bed is occupied, if the occupant is breathing and (hopefully) if (s)he still has a heartbeat. I assume it will also work if you are reclining on the sofa (extensive testing is in progress :-)
 
 There is not much code available for these boards, so here is an Arduino-style C++ class (written by one of the few remaining human programmers, soon to be plagiarised by AI). It should be easy to adapt it for any architecture.
+
+> [!NOTE]
+> These boards seem to be becoming obsolete. Maybe because there was no decent software for them. Until now ;-)
 
 
 ## Firmware Versions and Updating the Firmware
@@ -21,12 +24,11 @@ https://wiki.seeedstudio.com/Radar_MR24HPC1/#firmware-version-updates
 
 
 
-
 ## Safe For 3.3V MCUs
 
 Although the sensor's supply is 5V, its outputs are all 3.3V. This is because the onboard MCU runs at 3.3V, from its own on-board 3.3V LDO regulator. **So these sensors are safe to use with 3.3V MCUs :-)**
 
-To avoid complications it's probably best to use these sensors only with 3.3V MCUs.
+To avoid complications it is recommended that these sensors are used only with 3.3V MCUs. 
 
 The sensor's RX input is probably 5V-tolerant - but there is no mention of this in the documentation. To be safe, if you are using a 5V MCU, put a 10K resistor between the MCU's TX output and the sensor's RX input. This will also protect against "back-powering the sensor through the RX input's protection diode" if the sensor's 5V supply is disconnected while the MCU still has power. That could damage your board if more than (about) 1mA flows into the RX input.
 
@@ -63,9 +65,11 @@ byte | 0     | 1   2   |  3       | 4         | 5         | 6..len-7  | len-1   
 
 If the sensor is being used only to detect presence and motion, then these two outputs are all you need. You don't even need this library (except for configuration).
 
-3.3V = high, 0V = low
-S1 Output : high = occupied, low = unoccupied
+3.3V = high, 0V = low \
+S1 Output : high = occupied, low = unoccupied \
 S2 Output : high = motion detected, low = stationary or unoccupied
+
+The four general-purpose GPIOs, GP1..GP4, do not seem to be usable, although they are wired to the connector. It would have been nice if there were serial commands to access these. I guess they need custom firware to be usable.
 
 
 ## Startup Time, "abnormal reset" and "init successful" report messages
@@ -92,11 +96,11 @@ Each character is validated by the `receiveByte()` state machine as it is receiv
 If a report message is lost, it usually does not matter because the state machine will re-synchronize and the next report message will be received correctly. If a command response is lost, the command is re-sent with up to two retries (three attempts).
 
 > [!NOTE]
-> If you hit a breakpoint, or delay too long between polls, characters will be lost and communications errors will be reported. It will always re-sync and recover. \
+> If your software hits a breakpoint, or delays too long between polls, bytes will be lost and communications errors will be reported. It will always re-sync and recover. \
 > Do not use a timer interrupt for polling, because communications methods will not work if called from an interrupt handler (in the Arduino environment).
 
 
-### Startup time and polling example
+### Startup and polling example
 
 ```cpp
 void loop()
@@ -108,8 +112,6 @@ void loop()
     static ulong t1 = 0;
     if (t - t1 >= 200) {
         t1 = t;
-
-        static bool sensorConfigured = false;
 
         // if the sensor has finished initalizing, 
         // then we can configure it and start polling
@@ -124,6 +126,7 @@ void loop()
             // when first ready, do one-time reads and configuration
             // (note that the settings are stored in nonvolatile memory, 
             // so you only need to program them once)
+            static bool sensorConfigured = false;
             if (!sensorConfigured) {
                 sensorConfigured = true;
                 // these determine the communications behaviour
@@ -134,11 +137,6 @@ void loop()
                 sensor.readSleepMonitoring();
             }
         }
-        else {
-            // something nasty happened, the sensor must be re-configured
-            // when it's back on line
-            sensorConfigured = false;
-        }
     }
 }
 ```
@@ -146,37 +144,46 @@ void loop()
 
 ## Configuration
 
-The settings are stored in nonvolatile memory, so they only need to be programmed once. There are only four settings which can be configured.
+The settings are stored in nonvolatile memory, so they only need to be programmed once. 
 
-**Unoccupied Delay**
+Because the sensor has a start-up period, you may not be able to configure it in `setup()`. Wait until `isReady()` returns `true` before calling any of the `writeXXX()` commands. One way to do this is shown in the example sketch.
+
+After configuration, the sensor probably needs a power-up reset or a reboot, but this is not specified in the documentation. 
+
+There are only four settings which can be configured.
+
+### Unoccupied Delay
 `bool writeUnoccupiedDelay(byte unoccupiedDelay);` \
-The delay between the last detection of motion and the change of state to 'Unoccupied'. This could be used to keep lights on for a minimum period. \
+This is the delay between the last detection of motion and the change of state to 'Unoccupied'. This could be used to keep lights on for a minimum period. \
 0=none (default), 1=10s, 2=30s, 3=1min, 4=2min, 5=5min, 6=10min, 7=30min, 8=60min
 
-**Scene** \
+### Scene
 `bool writeSceneSetting(SceneSettng scenesetting);` \
-The Scene setting selects a parameters to configure it for a specific environment. \
+The Scene setting selects a pre-programmed set of parameters to configure it for a specific environment. The documentation does not provide many details about these settings. \
 0=default, 1=area, 2=bathroom, 3=bedroom, 4=living room, 5=office, 6=hotel
 
-**Sensitivity** \
+### Sensitivity
 `bool writeSensitivitySetting(byte sensistivity);` \
 0..10 : 0=not initialised, 1=minimum sensitivity, ..., 10=maximum sensitivity, default=7
 
-**Enable Sleep Monitoring** \
+### Enable Sleep Monitoring
 `bool enableSleepMonitoring(bool enable);` \
-Enables sleep state monitoring. Without this being enabled, none of the sleep state reorst will be sent.
+Enables or disables sleep state monitoring. If not enabled, none of the sleep state reports will be sent. Keep this disabled if you are only doing presence and motion detection.
 
 Use the `readXXX()` methods to read the current settings.
 
 
-
 ## Reboot Command
 
-not working on my fw
+A reboot or power up is probably needed after any of the settings are changed, but this is not specified in the documentation. 
 
+Unfortunately, the reboot command described in the manual does not work with my sensor. This could be because it's an old version of the firmware. 
 
+I asked about this on the product's Seeed Studio Wiki, but received no replies so far.
 
+My firmware version is G24VD1SYV010105 (v1.1.5). According to an AI query, there was a version v1.1.6, but I can't find any information about it.
 
+> **There will be an update if I find out more.**
 
 
 ## Library Features
@@ -224,14 +231,12 @@ The library is in a single include file, not in two separate `.h` and `.cpp` fil
 class MR24BSD1mmWave
 {
 public:
-    enum OccupiedState : byte 
-    {
+    enum OccupiedState : byte {
         Unoccupied = 0,
         Stationary = 1,
         Moving = 2
     };
-    enum MotionState : byte 
-    {
+    enum MotionState : byte {
         NotInit = 0,
         NoMotion = 1,
         Approaching = 2,
@@ -239,8 +244,7 @@ public:
         MovingAbout = 4,
         Undoc1 = 5              // ? undocumented
     };
-    enum BreathingState : byte 
-    {
+    enum BreathingState : byte {
         Normal = 0,             // still alive
         NotBreathing = 1,       // "abnormal suffocation" !
         NoSignal = 2,           // breathing state not available/unoccupied
@@ -248,21 +252,18 @@ public:
         Abnormal = 4,           // too much movement to detect breathing
         Rapid = 5               // excercising?
     };
-    enum SleepingState : byte 
-    {
+    enum SleepingState : byte {
         Awake = 0,
         LightSleep = 1,
         DeepSleep = 2,
         SleepStateNotAvailable = 3
     };
-    enum BedOccupiedState : byte 
-    {
+    enum BedOccupiedState : byte {
         OutOfBed = 0,
         InBed = 1,
         BedStateNotAvailable = 2
     };
-    enum SceneSetting : byte 
-    {
+    enum SceneSetting : byte {
         Default = 0,
         Area = 1,
         Bathroom = 2,
@@ -290,7 +291,7 @@ public:
         byte motionAmplitude;           // 0..100% (can also read with readMotionAmplitude())
         byte breathingRate;             // breaths per minute
         OccupiedState heartbeatState;   // occupied state of creature with heartbeat?
-        byte heartRate;                 // beats per minute
+        byte heartRate;                 // beats per minute, see Note (1)
 
         //>>> Sleep State Monitoring, requires enableSleepMonitoring(true)
         bool sleepMonitoringEnabled;
@@ -376,6 +377,9 @@ public:
 
 ```
 
+Note 1) The MicRadar manual for the R24BDD1 version does not mention _heartrate monitoring_ anywhere.
+
+
 ## Example Sketch
 
 
@@ -401,7 +405,6 @@ What about pets?
 
 
 
-
 vibrating objects
 
 scenes
@@ -414,10 +417,7 @@ heartbeat
 
 breathing
 
-Under the bed
-
-On the sofa
-
+mounting the sensor under the bed
 
 
 
@@ -439,6 +439,7 @@ https://www.micradar.cn/en/prodetails-25.html \
 https://www.micradar.cn/uploads/soft/20220801/1659342876.pdf
 
 **MicRadar's YouTube Channel** \
+This has not been updated for over 2 years. They seem to have lost interest. Perhaps their products are becoming obsolete. \
 https://www.youtube.com/@micradartechnology8198/videos
 
 <!--
@@ -450,7 +451,7 @@ https://www.bestmodulescorp.com/en/amfile/file/download/file/1598/product/708
 
 ## Other Libraries
 
-I only found two other Arduino style libraries for this module.
+I only found two other Arduino style libraries for these modules.
 
 **The library from the Seeed Studio Wiki page** \
 This does not do very much. \
@@ -464,7 +465,7 @@ https://github.com/taunoe/Seeed-MR24BSD1
 
 | Date       | Version  | Notes        |
 |:---------- |:---------| :----------- |
-| 2026.11.26 | 0.0.0    | Preliminary  |
+| 2026.11.27 | 0.0.0    | Preliminary  |
 
 <br/>
 
@@ -473,6 +474,5 @@ https://github.com/taunoe/Seeed-MR24BSD1
 
 What did Adam say on the day before Christmas? 
 
-"It's Christmas, Eve."
-
+_"It's Christmas, Eve."_
 
