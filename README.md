@@ -14,14 +14,14 @@ There is not much code available for these boards, so here is an Arduino-style C
 > [!NOTE]
 > These boards seem to be becoming obsolete. Maybe because there was no decent software for them. Until now ;-)
 
-
+<!--
 ## Firmware Versions and Updating the Firmware
 
 TODO
 
 fw update it works for the MR24HPC1 - what about the MR24DSD1? \
 https://wiki.seeedstudio.com/Radar_MR24HPC1/#firmware-version-updates
-
+-->
 
 
 ## Safe For 3.3V MCUs
@@ -95,8 +95,8 @@ Each character is validated by the `receiveByte()` state machine as it is receiv
 
 If a report message is lost, it usually does not matter because the state machine will re-synchronize and the next report message will be received correctly. If a command response is lost, the command is re-sent with up to two retries (three attempts).
 
-> [!NOTE]
-> If your software hits a breakpoint, or delays too long between polls, bytes will be lost and communications errors will be reported. It will always re-sync and recover. \
+> [!TIP]
+> If your software hits a breakpoint, or delays too long between polls, bytes will be lost and communications errors will be reported. Howvere, the state machine will always re-sync and recover. \
 > Do not use a timer interrupt for polling, because communications methods will not work if called from an interrupt handler (in the Arduino environment).
 
 
@@ -152,21 +152,25 @@ After configuration, the sensor probably needs a power-up reset or a reboot, but
 
 There are only four settings which can be configured.
 
-### Unoccupied Delay
+### Unoccupied delay
+
 `bool writeUnoccupiedDelay(byte unoccupiedDelay);` \
 This is the delay between the last detection of motion and the change of state to 'Unoccupied'. This could be used to keep lights on for a minimum period. \
 0=none (default), 1=10s, 2=30s, 3=1min, 4=2min, 5=5min, 6=10min, 7=30min, 8=60min
 
 ### Scene
+
 `bool writeSceneSetting(SceneSettng scenesetting);` \
 The Scene setting selects a pre-programmed set of parameters to configure it for a specific environment. The documentation does not provide many details about these settings. \
 0=default, 1=area, 2=bathroom, 3=bedroom, 4=living room, 5=office, 6=hotel
 
 ### Sensitivity
+
 `bool writeSensitivitySetting(byte sensistivity);` \
 0..10 : 0=not initialised, 1=minimum sensitivity, ..., 10=maximum sensitivity, default=7
 
-### Enable Sleep Monitoring
+### Enable/disable sleep monitoring
+
 `bool enableSleepMonitoring(bool enable);` \
 Enables or disables sleep state monitoring. If not enabled, none of the sleep state reports will be sent. Keep this disabled if you are only doing presence and motion detection.
 
@@ -179,11 +183,11 @@ A reboot or power up is probably needed after any of the settings are changed, b
 
 Unfortunately, the reboot command described in the manual does not work with my sensor. This could be because it's an old version of the firmware. 
 
-I asked about this on the product's Seeed Studio Wiki, but received no replies so far.
+I asked about this on the product's Seeed Studio Wiki, but have received no replies so far.
 
 My firmware version is G24VD1SYV010105 (v1.1.5). According to an AI query, there was a version v1.1.6, but I can't find any information about it.
 
-> **There will be an update if I find out more.**
+> There will be an update if I find out more.
 
 
 ## Library Features
@@ -202,7 +206,7 @@ My firmware version is G24VD1SYV010105 (v1.1.5). According to an AI query, there
 
 * Provides all the sensor's data in a memory-optimised `MR24BSD1Properties` structure.
 
-* Easily supports multiple sensors on different `SoftwareSerial` ports.
+* Supports multiple sensors on different `SoftwareSerial` ports (depending on your MCU).
 
 * The source code contains meaningful comments, making it easy to understand what each method does, and why.
 
@@ -291,7 +295,7 @@ public:
         byte motionAmplitude;           // 0..100% (can also read with readMotionAmplitude())
         byte breathingRate;             // breaths per minute
         OccupiedState heartbeatState;   // occupied state of creature with heartbeat?
-        byte heartRate;                 // beats per minute, see Note (1)
+        byte heartRate;                 // beats per minute
 
         //>>> Sleep State Monitoring, requires enableSleepMonitoring(true)
         bool sleepMonitoringEnabled;
@@ -308,10 +312,10 @@ public:
 
         // Sensor information
         // if needed, these must be initialized by the relevant readXXX() commands
-        char deviceId[14];          // "96uIag1tfhihh" (examples from my board)
-        char firmwareVersion[16];   // "G24VD1SYV010105"
-        char hardwareVersion[5];    // "R24A"
-        byte protocolVersion;       // 1
+        char deviceId[14];              // "96uIag1tfhihh" (examples from my board)
+        char firmwareVersion[16];       // "G24VD1SYV010105"
+        char hardwareVersion[5];        // "R24A"
+        byte protocolVersion;           // 1
 
         // Settings
         // if needed, these must be initialized by the relevant readXXX() commands
@@ -377,12 +381,13 @@ public:
 
 ```
 
-Note 1) The MicRadar manual for the R24BDD1 version does not mention _heartrate monitoring_ anywhere.
 
 
+<!-- Note 1) The MicRadar manual for the R24BDD1 version does not mention _heartrate monitoring_ anywhere. -->
+
+
+<!--
 ## Example Sketch
-
-
 
 
 ```cpp
@@ -391,7 +396,9 @@ Note 1) The MicRadar manual for the R24BDD1 version does not mention _heartrate 
 ensor.properties.deviceReady = true;
 ```
 
+-->
 
+<!--
 
 ## Practical Tests
 
@@ -419,6 +426,7 @@ breathing
 
 mounting the sensor under the bed
 
+-->
 
 
 ## References
