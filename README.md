@@ -5,7 +5,7 @@ _Released under the terms of the BSD 3-Clause License_
 
 There are two versions of this board. The "MR24BSD1" is the Seeed Studio version, and the "R24BBD1" is the (original?) MicRadar version. The Seeed Studio manual has the MicRadar model number 'R24BBD1' on its cover, so I guess they are the same board. (They may contain different firmware, but I'm still waiting for my genuine MicRadar board to arrive.)
 
-<img alt="R24 mmWave boards" src="images/R24-boards.jpg" />
+<img height="500" alt="R24 mmWave boards" src="images/R24-boards.jpg" />
 
 These mmWave boards are not only for presence detection. They have a large radar array which is sensitive enough to measure breathing and heartbeats. If mounted above or below a bed, it will tell you if the bed is occupied, if the occupant is breathing and (hopefully) if (s)he still has a heartbeat. I assume it will also work if you are reclining on the sofa (extensive testing is in progress :-)
 
@@ -464,7 +464,7 @@ https://github.com/taunoe/Seeed-MR24BSD1
 
 | Date       | Version  | Notes        |
 |:---------- |:---------| :----------- |
-| 2026.11.24 | 0.0.0    | Preliminary  |
+| 2026.11.26 | 0.0.0    | Preliminary  |
 
 <br/>
 
