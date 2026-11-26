@@ -3,7 +3,7 @@
 _Copyright (C) 2026, muman.ch + github.com/mumanchu_ \
 _Released under the terms of the BSD 3-Clause License_
 
-There are two versions of this board. The "MR24BSD1" is the Seeed Studio version, and the "R24BBD1" is the original MicRadar version. The Seeed Studio manual has the MicRadar model number 'R24BBD1' on its cover, so I guess they are the same board. (They may contain different firmware, but I'm still waiting for my genuine MicRadar board to arrive.)
+There are two versions of this board. The "MR24BSD1" is the Seeed Studio version, and the "R24BBD1" is the original MicRadar version. The Seeed Studio manual has the MicRadar model number 'R24BBD1' on its cover, so I guess they are the same board. They may contain different firmware, but I'm still waiting for my genuine [obsolete] MicRadar board to arrive.
 
 <img height="500" alt="R24 mmWave boards" src="images/R24-boards.jpg" />
 
@@ -181,12 +181,13 @@ Use the `readXXX()` methods to read the current settings.
 
 A reboot or power up is probably needed after any of the settings are changed, but this is not specified in the documentation. 
 
-Unfortunately, the reboot command described in the manual does not work with my sensor. This could be because it's an old version of the firmware. 
+Unfortunately, the reboot command described in the manual does not work with my sensor. This could be because it has an old version of the firmware. 
 
 I asked about this on the product's Seeed Studio Wiki, but have received no replies so far.
 
 My firmware version is G24VD1SYV010105 (v1.1.5). According to an AI query, there was a version v1.1.6, but I can't find any information about it.
 
+> [!NOTE]
 > There will be an update if I find out more.
 
 
