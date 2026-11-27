@@ -61,14 +61,12 @@ class MR24BSD1mmWave
 	uint rxCrc;
 
 public:
-	enum OccupiedState : byte
-	{
+	enum OccupiedState : byte {
 		Unoccupied = 0,
 		Stationary = 1,
 		Moving = 2
 	};
-	enum MotionState : byte
-	{
+	enum MotionState : byte {
 		NotInit = 0,
 		NoMotion = 1,
 		Approaching = 2,
@@ -76,8 +74,7 @@ public:
 		MovingAbout = 4,
 		Undoc1 = 5              // ? undocumented
 	};
-	enum BreathingState : byte
-	{
+	enum BreathingState : byte {
 		Normal = 0,             // still alive
 		NotBreathing = 1,       // "abnormal suffocation" !
 		NoSignal = 2,           // breathing state not available/unoccupied
@@ -85,21 +82,18 @@ public:
 		Abnormal = 4,           // too much movement to detect breathing
 		Rapid = 5               // excercising?
 	};
-	enum SleepingState : byte
-	{
+	enum SleepingState : byte {
 		Awake = 0,
 		LightSleep = 1,
 		DeepSleep = 2,
 		SleepStateNotAvailable = 3
 	};
-	enum BedOccupiedState : byte
-	{
+	enum BedOccupiedState : byte {
 		OutOfBed = 0,
 		InBed = 1,
 		BedStateNotAvailable = 2
 	};
-	enum SceneSetting : byte
-	{
+	enum SceneSetting : byte {
 		Default = 0,
 		Area = 1,
 		Bathroom = 2,
