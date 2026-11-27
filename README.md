@@ -3,7 +3,7 @@
 _Copyright (C) 2026, muman.ch + github.com/mumanchu_ \
 _Released under the terms of the BSD 3-Clause License_
 
-** **PRELIMINARY** **
+** **PRELIMINARY** ** _Subject to change without noticing_
 
 There are two versions of this 24GHz mmWave board. The "MR24BSD1" is the Seeed Studio version, and the "R24BBD1" is the original MicRadar version. The Seeed Studio manual has the MicRadar model number 'R24BBD1' on its cover, so I guess they are the same board. They may contain different firmware, but I'm still waiting for my MicRadar board to arrive.
 
