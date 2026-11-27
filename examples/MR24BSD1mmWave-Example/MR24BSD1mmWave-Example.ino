@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Example Sketch for Arduino Library for Seeed Studio MR24BSD1 mmWave 
-// Sleep Monitoring Sensor, or the MicRadar R24BBD1
-// Copyright (C) https://muman.ch and https://github.com/mumanchu, 2026.11.26
+// Sleep Monitoring Sensor, also works for the MicRadar R24BBD1
+// Copyright (C) https://muman.ch and https://github.com/mumanchu, 2026.11.27
 // Released under the terms of the BSD 3-Clause License
 // If you re-use this software please include the above copyright notice
 // 
@@ -22,7 +22,7 @@
 // !!!NOTE!!!  
 // If you select "No Optimisation" for the Arduino Due, then the build may
 // fail with this message:
-//  "HardwareSerial.h:26: undefined reference to vtable for HardwareSerial"
+// "HardwareSerial.h:26: undefined reference to vtable for HardwareSerial"
 // It's a problem with the board package code. Set it to "Default Optimisation",
 // do a 'Clean solution' and re-build. Or use the fix described here:
 // https://learn.adafruit.com/proper-step-debugging-atsamd21-arduino-zero-m0/paths-and-optimizations#fixing-some-core-files-2469468-17
@@ -51,6 +51,7 @@ Uart Serial1(USART1);
 // see the code in setup() below
 #endif
 
+
 // For MR24BSD1 debug messages on the Serial Monitor
 #ifdef DEBUG
 #define MR24BSD1_PRINTLN(s) { Serial.println(s); Serial.flush(); }
@@ -74,8 +75,6 @@ void occupiedStateChanged(MR24BSD1mmWave* thisSensor,
 	Serial.print(occupiedStateStrings[newState]);
 	Serial.print(", old=");
 	Serial.println(occupiedStateStrings[oldState]);
-	//Serial.printf("\n\rOccupied status changed, new=%s, old=%s\n\r", 
-	//	occupiedStateStrings[newState], occupiedStateStrings[oldState]);
 	Serial.flush();
 }
 
@@ -101,20 +100,23 @@ void setup()
 	Serial.println("\r\nMR24BSD1mmWave Started...\r\n");
 	Serial.flush();
 
-	
 	// callback notification if occupied state changes
 	sensor.occupiedStateChangedCallback = occupiedStateChanged;
 
-	// serial port for the sensor, fixed speed is 9600 bps
+	// 'Serial1' is the port for the mmWave sensor, fixed speed is 9600 bps
+	#if defined(ARDUINO_ARCH_ESP32)
+	// for the ESP32s, Serial1's pins can be defined
+	Serial1.setPins(6 /*rxPin*/, 7 /*txPin*/);
+	#endif
 	Serial1.begin(9600);
 
 	// start the sensor
-	// NOTE! The sensor needs a "warm-up time" of 30 seconds before 
-	// you can send or receive valid data, this is handled in loop().
+	// NOTE! The sensor needs a warm-up time before you can send or 
+	// receive valid data, this is handled in loop()
 	sensor.begin(&Serial1);
 
 	// when debugging, uncomment this to disable the startup delay
-	// after the first power up
+	// if the sensor does not get a power up reset each time
 	//sensor.properties.initSuccessful = true;
 }
 
@@ -130,10 +132,8 @@ void loop()
 	if (t - t1 >= 200) {
 		t1 = t;
 
-		static bool sensorConfigured = false;
-
-		// if the sensor has finished initalizing, 
-		// then we can configure it and start polling
+		// if the sensor has finished initalizing, then we can read data 
+		// or configure it, and start polling
 		if (sensor.isReady()) {
 
 			// when a report message is received from the sensor, 
@@ -145,21 +145,19 @@ void loop()
 			// when first ready, do one-time reads and configuration
 			// (note that the settings are stored in nonvolatile memory, 
 			// so you only need to program them once)
+			static bool sensorConfigured = false;
 			if (!sensorConfigured) {
 				sensorConfigured = true;
-				// these determine the communications behaviour
+
+				// these can be used to determine communications behaviour
 				sensor.readFirmwareVersion();
 				sensor.readProtocolVersion();
 				// we want to do sleep monitoring too
-				//sensor.enableSleepMonitoring(true);
+				//sensor.enableSleepMonitoring(true);	// do this once
 				sensor.readSleepMonitoring();
 			}
 		}
-		else {
-			// something nasty happened, the sensor must be re-configured
-			// when it's back on line
-			sensorConfigured = false;
-		}
 	}
+
 }
 
