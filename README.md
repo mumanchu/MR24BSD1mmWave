@@ -475,7 +475,6 @@ It does not do very much. \
 https://github.com/limengdu/Seeed-Studio-MR24BSD1-Sensor
 
 **This one does a bit more** \
-<!-- But it's spoiled by `Serial.print()` statements in the code which must be patched out, and the handling of 32-bit `ulong` values could be improved. -->
 https://github.com/taunoe/Seeed-MR24BSD1
 
 
