@@ -12,10 +12,11 @@
 // Add the SoftwareSerial library
 #include <SoftwareSerial.h>
 
-// The example uses SoftwareSerial on D2 and D8
+// This example sketch uses SoftwareSerial on D2 and D8
 // change the pin numbers according to your wiring and your MCU
+// note that the MCU's RX pin must be connected to the sensor's TX pin,
+// and the MCU's TX pin must be connected to the sensor's RX pin
 SoftwareSerial SwSerial(2 /*rxPin*/, 8 /*txPin*/);
-
 
 // Comment this out to remove the debug output and additional validation
 // and reduces the code size by about 3000 bytes
@@ -35,6 +36,7 @@ MR24BSD1mmWave sensor;
 
 
 // Callback notification if the occupied state changes
+// TODO add a callback for sleepingStateChanged (that's your homework)
 void occupiedStateChanged(MR24BSD1mmWave* thisSensor,
 	MR24BSD1mmWave::OccupiedState newState, 
 	MR24BSD1mmWave::OccupiedState oldState)
@@ -48,7 +50,7 @@ void occupiedStateChanged(MR24BSD1mmWave* thisSensor,
 }
 
 
-// Get ready
+// Get ready...
 void setup() 
 {
 	// Use different pins for Serial logging on the STM32 Nucleo-64 boards,
@@ -114,13 +116,14 @@ void loop()
 			if (!sensorConfigured) {
 				sensorConfigured = true;
 
-				// these can be used to determine communications behaviour
+				// these could be used to determine communications behaviour
 				sensor.readFirmwareVersion();
 				sensor.readProtocolVersion();
 				// we want to do sleep monitoring too
-				//sensor.enableSleepMonitoring(true);	// do this once
+				//sensor.enableSleepMonitoring(true);	// configure this once
 				sensor.readSleepMonitoring();
 			}
 		}
 	}
 }
+
