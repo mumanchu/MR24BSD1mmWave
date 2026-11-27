@@ -12,18 +12,8 @@ These mmWave boards are not only for presence detection. They have large radar a
 There is not much code available for these boards, so here is an Arduino-style C++ class (written by one of the few remaining human programmers, soon to be plagiarised by AI). It should be easy to adapt it for any architecture.
 
 > [!NOTE]
-> These old boards are becoming obsolete, there are very few for sale. Maybe because there was no decent software for them. Until now ;-) \
+> These old boards are becoming obsolete, there are very few for sale. Maybe that's because there was no decent software for them. Until now ;-) \
 > I guess they are being replaced by the (more expensive) 60GHz versions.
-
-
-<!--
-## Firmware Versions and Updating the Firmware
-
-TODO
-
-fw update it works for the MR24HPC1 - what about the MR24DSD1? \
-https://wiki.seeedstudio.com/Radar_MR24HPC1/#firmware-version-updates
--->
 
 
 ## Safe For 3.3V MCUs
@@ -153,7 +143,7 @@ Because the sensor has a start-up period, you may not be able to configure it in
 
 After configuration, the sensor probably needs a power-up reset or a reboot, but this is not specified in the documentation. 
 
-There are only four settings which can be configured.
+There are only four settings which can be configured. Use the `readXXX()` methods to read the current settings.
 
 ### Unoccupied delay
 
@@ -175,9 +165,7 @@ The Scene setting selects a pre-programmed set of parameters to configure it for
 ### Enable/disable sleep monitoring
 
 `bool enableSleepMonitoring(bool enable);` \
-Enables or disables sleep state monitoring. If not enabled, none of the sleep state reports will be sent. Keep this disabled if you are only doing presence and motion detection.
-
-Use the `readXXX()` methods to read the current settings.
+Enables or disables sleep state monitoring. If not enabled, none of the sleep state reports will be sent. Disable this if you are only doing presence and motion detection.
 
 
 ## Reboot Command
@@ -206,6 +194,16 @@ But is it accurate?
 
 ...
 <!-- TODO test it! -->
+
+
+<!-- TODO
+## Firmware Versions and Updating the Firmware
+
+TODO
+
+fw update it works for the MR24HPC1 - what about the MR24DSD1? \
+https://wiki.seeedstudio.com/Radar_MR24HPC1/#firmware-version-updates
+-->
 
 
 ## Library Features
