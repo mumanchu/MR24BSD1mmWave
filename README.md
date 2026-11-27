@@ -1,9 +1,9 @@
-﻿# Arduino Library for MR24BSD1 and R24BBD1 mmWave Sleep Monitoring Sensors
+﻿# Arduino Library for MR24BSD1 and R24BBD1 24GHz mmWave Sleep Monitoring Sensors
 
 _Copyright (C) 2026, muman.ch + github.com/mumanchu_ \
 _Released under the terms of the BSD 3-Clause License_
 
-There are two versions of this board. The "MR24BSD1" is the Seeed Studio version, and the "R24BBD1" is the original MicRadar version. The Seeed Studio manual has the MicRadar model number 'R24BBD1' on its cover, so I guess they are the same board. They may contain different firmware, but I'm still waiting for my MicRadar board to arrive.
+There are two versions of this 24GHz mmWave board. The "MR24BSD1" is the Seeed Studio version, and the "R24BBD1" is the original MicRadar version. The Seeed Studio manual has the MicRadar model number 'R24BBD1' on its cover, so I guess they are the same board. They may contain different firmware, but I'm still waiting for my MicRadar board to arrive.
 
 <img height="500" alt="R24 mmWave boards" src="images/R24-boards.jpg" />
 
@@ -214,7 +214,7 @@ But is it accurate?
 
 * It has callbacks for when the _occupied state_ or _sleep state_ changes. The _bed occupied state_ could be handled in the same way.
 
-* Because these sensors may be used in critical environments (hospitals, nursing homes, brothels, funeral parlours, etc), additional "sensor not responding" and "sensor not initialized" features have been implemented.
+* Because these sensors may be used in critical environments (hospitals, nursing homes, morgues, etc), additional "sensor not responding" and "sensor not initialized" features have been implemented.
 
 * Uses a simple state machine (6 states) for receiving and validating message frames from the sensor.
 
@@ -446,8 +446,9 @@ mounting the sensor under the bed
 ## References
 
 **Seeed Studio MR24BSD1 Sleep Monitoring User Manual** \
-(the title is 'R24BBD1', which is the MicRadar model number) \
+The title is 'R24BBD1', which is the MicRadar model number. This contains the protocol definition. \ 
 https://files.seeedstudio.com/wiki/mmWave-radar/MR24BSD1_User_Manual.pdf \
+(I would say this one is the "user manual", and the previous one is the "data sheet".) \
 https://files.seeedstudio.com/wiki/mmWave-radar/MR24BSD1_Datasheet.pdf
 
 **Seeed Studio Product Page** \
@@ -461,19 +462,20 @@ https://www.micradar.cn/en/prodetails-25.html \
 https://www.micradar.cn/uploads/soft/20220801/1659342876.pdf
 
 **MicRadar's YouTube Channel** \
-This has not been updated for over 2 years. They seem to have lost interest. Perhaps their products are now obsolete. \
+This has not been updated for over 2 years. \
 https://www.youtube.com/@micradartechnology8198/videos
 
 
 ## Other Libraries
 
-I found only two other Arduino style libraries for these modules.
+I found only two other Arduino style libraries for these boards.
 
 **The library from the Seeed Studio Wiki page** \
 It does not do very much. \
 https://github.com/limengdu/Seeed-Studio-MR24BSD1-Sensor
 
 **This one does a bit more** \
+<!-- But it's spoiled by `Serial.print()` statements in the code which must be patched out, and the handling of 32-bit `ulong` values could be improved. -->
 https://github.com/taunoe/Seeed-MR24BSD1
 
 
@@ -481,7 +483,7 @@ https://github.com/taunoe/Seeed-MR24BSD1
 
 | Date       | Version  | Notes        |
 |:---------- |:---------| :----------- |
-| 2026.11.27 | 0.0.0    | Preliminary, from an old room controller project |
+| 2026.11.27 | 0.0.0    | Preliminary, adapted from an old room controller project |
 
 <br/>
 
