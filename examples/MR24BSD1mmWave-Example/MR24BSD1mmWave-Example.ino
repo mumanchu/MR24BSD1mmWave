@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Example Sketch for Arduino Library for Seeed Studio MR24BSD1 mmWave 
 // Sleep Monitoring Sensor, also works for the MicRadar R24BBD1
-// Copyright (C) https://muman.ch and https://github.com/mumanchu, 2026.11.27
+// Copyright (C) https://muman.ch + https://github.com/mumanchu, 2026.11.27
 // Released under the terms of the BSD 3-Clause License
 // If you re-use this software please include the above copyright notice
 // 
@@ -9,48 +9,17 @@
 // https://github.com/mumanchu/MR24BSD1mmWave
 
 
+// Add the SoftwareSerial library
+#include <SoftwareSerial.h>
+
+// The example uses SoftwareSerial on D2 and D8
+// change the pin numbers according to your wiring and your MCU
+SoftwareSerial SwSerial(2 /*rxPin*/, 8 /*txPin*/);
+
+
 // Comment this out to remove the debug output and additional validation
+// and reduces the code size by about 3000 bytes
 #define DEBUG
-
-// The usual 'Serial' is for the Serial Monitor so you can see the data
-// 'Serial1' is used for the mmWave sensor's UART, but the pins may be 
-// different on each microcontroller board. Here are some examples...
-
-#if defined(ARDUINO_SAM_DUE)
-// The Arduino Due has Serial1 on TX1 (18) and RX1 (19), connect these to RX 
-// and TX of the sensor
-// !!!NOTE!!!  
-// If you select "No Optimisation" for the Arduino Due, then the build may
-// fail with this message:
-// "HardwareSerial.h:26: undefined reference to vtable for HardwareSerial"
-// It's a problem with the board package code. Set it to "Default Optimisation",
-// do a 'Clean solution' and re-build. Or use the fix described here:
-// https://learn.adafruit.com/proper-step-debugging-atsamd21-arduino-zero-m0/paths-and-optimizations#fixing-some-core-files-2469468-17
-#endif
-
-#if defined(ARDUINO_ARCH_STM32)
-// On the STM32F103 Nucleo board, 'Serial' is the USB port
-// so we use USART1, TX=D8 (PA9), RX=D2 (PA10) for the mmWave sensor
-//HardwareSerial Serial1(USART1);
-Uart Serial1(USART1);
-#endif
-
-#if defined(ARDUINO_ARCH_AVR)
-// SoftwareSerial will work at 9600 baud on AVR processors
-//TODO
-#endif
-
-#if defined(ARDUINO_SAMD_ZERO)
-// Arduino Zero has 'Serial1' on pin 0 (RX) and pin 1 (TX), so you don't need 
-// to do anything. 'Serial' is the USB port, so connect your Serial Monitor to 
-// the port called 'Atmel Corp. EDBG CMSIS-DAP'
-#endif
-
-#if defined(ARDUINO_ARCH_ESP32)
-// For the ESP32s, Serial1's pins can be defined
-// see the code in setup() below
-#endif
-
 
 // For MR24BSD1 debug messages on the Serial Monitor
 #ifdef DEBUG
@@ -100,20 +69,16 @@ void setup()
 	Serial.println("\r\nMR24BSD1mmWave Started...\r\n");
 	Serial.flush();
 
+	// serial port for the mmWave sensor
+	SwSerial.begin(9600);
+
 	// callback notification if occupied state changes
 	sensor.occupiedStateChangedCallback = occupiedStateChanged;
 
-	// 'Serial1' is the port for the mmWave sensor, fixed speed is 9600 bps
-	#if defined(ARDUINO_ARCH_ESP32)
-	// for the ESP32s, Serial1's pins can be defined
-	Serial1.setPins(6 /*rxPin*/, 7 /*txPin*/);
-	#endif
-	Serial1.begin(9600);
-
-	// start the sensor
+	// start the mmWave sensor
 	// NOTE! The sensor needs a warm-up time before you can send or 
 	// receive valid data, this is handled in loop()
-	sensor.begin(&Serial1);
+	sensor.begin(&SwSerial);
 
 	// when debugging, uncomment this to disable the startup delay
 	// if the sensor does not get a power up reset each time
@@ -158,6 +123,4 @@ void loop()
 			}
 		}
 	}
-
 }
-
