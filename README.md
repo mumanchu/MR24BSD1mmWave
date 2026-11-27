@@ -3,7 +3,7 @@
 _Copyright (C) 2026, muman.ch + github.com/mumanchu_ \
 _Released under the terms of the BSD 3-Clause License_
 
-There are two versions of this board. The "MR24BSD1" is the Seeed Studio version, and the "R24BBD1" is the original MicRadar version. The Seeed Studio manual has the MicRadar model number 'R24BBD1' on its cover, so I guess they are the same board. They may contain different firmware, but I'm still waiting for my genuine MicRadar board to arrive.
+There are two versions of this board. The "MR24BSD1" is the Seeed Studio version, and the "R24BBD1" is the original MicRadar version. The Seeed Studio manual has the MicRadar model number 'R24BBD1' on its cover, so I guess they are the same board. They may contain different firmware, but I'm still waiting for my MicRadar board to arrive.
 
 <img height="500" alt="R24 mmWave boards" src="images/R24-boards.jpg" />
 
@@ -12,7 +12,8 @@ These mmWave boards are not only for presence detection. They have large radar a
 There is not much code available for these boards, so here is an Arduino-style C++ class (written by one of the few remaining human programmers, soon to be plagiarised by AI). It should be easy to adapt it for any architecture.
 
 > [!NOTE]
-> These boards seem to be becoming obsolete, there are very few for sale. Maybe because there was no decent software for them. Until now ;-)
+> These boards are becoming obsolete, there are very few for sale. Maybe because there was no decent software for them. Until now ;-) \
+> I guess they are being replaced by the 60GHz versions.
 
 
 <!--
@@ -34,8 +35,8 @@ To avoid complications, it is recommended that these sensors are not used with o
 The sensor's RX input is probably 5V-tolerant - but there is no mention of this in the documentation. To be safe, if you must use a 5V MCU, put a 10K resistor between the 5V MCU's TX output and the sensor's RX input. This will also protect against back-powering the sensor through the sensor's RX input's protection diode, if the sensor's 5V supply is disconnected while the MCU still has power. That could damage your board if more than (about) 1mA flows into the RX input.
 
 > [!TIP]
-> A 10K resistor is particularly important if you are using a P-CH MOSFET to switch the sensor's power off/on to reset the sensor, because the `reboot()` command does not work. (That would be required for the production version.) Or you could set the TX output to high impedance by configuring it as an INPUT while the sensor is powered off. \
-> In fact, if you have long RX/TX wires that run outside the sensor's enclosure, it's good practice to put 10K resistors in both the TX and the RX lines at the MCU end. This reduces echoes on the lines and gives additional protection against ESD. 
+> A 10K resistor is particularly important if you are using a P-CH MOSFET to switch the sensor's power off/on to reset the sensor, because the `reboot()` command does not work. (That would be required in a production version.) Or you could set the TX output to high impedance by configuring it as an INPUT while the sensor is powered off. \
+> In fact, if you have long RX/TX wires that run outside the sensor's enclosure, it's good practice to put 10K resistors in both the TX and the RX lines at the MCU end. This reduces echoes on the wires and gives additional protection against ESD. 
 
 
 ## 5V Power Supply 
@@ -195,7 +196,7 @@ I asked about this on the product's Seeed Studio Wiki, but have received no repl
 
 ## Heartbeat
 
-The Seeed Studio version reports a `heartbeatState` and a `heartbeatRate`, but the MicRadar version does not implement this. 
+The Seeed Studio version reports a `heartbeatState` and a `heartbeatRate`, but the MicRadar version does not mention this in its documentation. 
 
 Some mmWave sensors, which only send messages when something changes, implement a 'hearbeat' message which just informs the MCU that the sensor is still alive. This has nothing to do with a person's actual heartbeat.
 
@@ -460,14 +461,8 @@ https://www.micradar.cn/en/prodetails-25.html \
 https://www.micradar.cn/uploads/soft/20220801/1659342876.pdf
 
 **MicRadar's YouTube Channel** \
-This has not been updated for over 2 years. They seem to have lost interest. Perhaps their products are becoming obsolete. \
+This has not been updated for over 2 years. They seem to have lost interest. Perhaps their products are now obsolete. \
 https://www.youtube.com/@micradartechnology8198/videos
-
-<!--
-**Holtek HT7463A/B Step Down Converter** \
-For the manual's 2nd PSU circuit \
-https://www.bestmodulescorp.com/en/amfile/file/download/file/1598/product/708
--->
 
 
 ## Other Libraries
