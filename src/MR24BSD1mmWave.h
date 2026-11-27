@@ -3,7 +3,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Arduino Library for Seeed Studio MR24BSD1 mmWave Sleep Monitoring Sensor
 // also works for the MicRadar R24BBD1 
-// Copyright (C) https://muman.ch and https://github.com/mumanchu, 2026.11.24
+// Copyright (C) https://muman.ch and https://github.com/mumanchu, 2026.11.27
 // Released under the terms of the BSD 3-Clause License
 // If you re-use this software please include the above copyright notice
 // 
@@ -44,7 +44,7 @@ typedef unsigned short ushort;  // always 16 bits
 
 
 // CRC-16 calculations in file ModbusCrc16.cpp
-extern inline ushort modbusCrc16(ushort crc, byte b);
+extern ushort modbusCrc16(ushort crc, byte b);
 extern ushort modbusCrc16(ushort crc, const byte* msg, uint msglen);
 extern ushort modbusCrc16(const byte* msg, uint msglen);
 
@@ -116,9 +116,9 @@ public:
 	// All sensor data is maintained in this structure
 	struct MR24BSD1Properties
 	{
-		bool abnormalReset;             // device is initialising
-		bool initSuccessful;            // device is initialized, after "abnormal reset"
-		bool responding;
+		bool abnormalReset;             // sensor is initialising
+		bool initSuccessful;            // sensor is initialized, after "abnormal reset"
+		bool responding;                // sensor is sending messages (5 second timeout)
 
 		// Sensor Readings from report messages
 		OccupiedState occupiedState;    // (can also be read with readOccupiedState())
@@ -127,7 +127,7 @@ public:
 		byte motionAmplitude;           // 0..100% (can also read with readMotionAmplitude())
 		byte breathingRate;             // breaths per minute
 		OccupiedState heartbeatState;   // occupied state of creature with heartbeat?
-		byte heartRate;                 // beats per minute
+		byte heartbeatRate;             // beats per minute
 
 		//>>> Sleep State Monitoring, requires enableSleepMonitoring(true)
 		bool sleepMonitoringEnabled;
@@ -144,10 +144,10 @@ public:
 
 		// Sensor information
 		// if needed, these must be initialized by the relevant readXXX() commands
-		char deviceId[14];          // "96uIag1tfhihh" (examples from my board)
-		char firmwareVersion[16];   // "G24VD1SYV010105"
-		char hardwareVersion[5];    // "R24A"
-		byte protocolVersion;       // 1
+		char deviceId[14];              // "96uIag1tfhihh" (examples from my board)
+		char firmwareVersion[16];       // "G24VD1SYV010105"
+		char hardwareVersion[5];        // "R24A"
+		byte protocolVersion;           // 1
 
 		// Settings
 		// if needed, these must be initialized by the relevant readXXX() commands
@@ -718,7 +718,7 @@ bool MR24BSD1mmWave::processSleepReportMessage()
 			MR24BSD1_PRINTLN("bad addsCode2");
 			return false;
 		}
-		properties.heartRate = rxMsg[6];
+		properties.heartbeatRate = rxMsg[6];
 		break;
 	default:
 		MR24BSD1_PRINTLN("bad addsCode2");
@@ -771,7 +771,7 @@ bool MR24BSD1mmWave::pollMessage()
 		}
 	}
 
-	//TODO sensor not responding
+	// sensor is not responding
 	if (properties.responding) {
 		if (millis() - lastRxMsgTime > 5000) {
 			MR24BSD1_PRINTLN(" not responding");
