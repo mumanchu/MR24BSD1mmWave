@@ -3,16 +3,17 @@
 _Copyright (C) 2026, muman.ch + github.com/mumanchu_ \
 _Released under the terms of the BSD 3-Clause License_
 
-There are two versions of this board. The "MR24BSD1" is the Seeed Studio version, and the "R24BBD1" is the original MicRadar version. The Seeed Studio manual has the MicRadar model number 'R24BBD1' on its cover, so I guess they are the same board. They may contain different firmware, but I'm still waiting for my genuine [obsolete] MicRadar board to arrive.
+There are two versions of this board. The "MR24BSD1" is the Seeed Studio version, and the "R24BBD1" is the original MicRadar version. The Seeed Studio manual has the MicRadar model number 'R24BBD1' on its cover, so I guess they are the same board. They may contain different firmware, but I'm still waiting for my genuine MicRadar board to arrive.
 
 <img height="500" alt="R24 mmWave boards" src="images/R24-boards.jpg" />
 
-These mmWave boards are not only for presence detection. They have large radar arrays which are sensitive enough to measure breathing and heartbeats. If mounted above or below a bed, it will tell you if the bed is occupied, if the occupant is breathing and (hopefully) if (s)he still has a heartbeat. I assume it will also work if you are reclining on the sofa (extensive testing is in progress :-)
+These mmWave boards are not only for presence detection. They have large radar arrays which are sensitive enough to measure breathing and even heartbeats. If mounted above or below a bed, it will tell you if the bed is occupied, if the occupant is breathing and (hopefully) if (s)he still has a heartbeat. I assume it will also work if you are reclining on the sofa (extensive testing is in progress :-)
 
 There is not much code available for these boards, so here is an Arduino-style C++ class (written by one of the few remaining human programmers, soon to be plagiarised by AI). It should be easy to adapt it for any architecture.
 
 > [!NOTE]
-> These boards seem to be becoming obsolete. Maybe because there was no decent software for them. Until now ;-)
+> These boards seem to be becoming obsolete, there are very few for sale. Maybe because there was no decent software for them. Until now ;-)
+
 
 <!--
 ## Firmware Versions and Updating the Firmware
@@ -28,9 +29,9 @@ https://wiki.seeedstudio.com/Radar_MR24HPC1/#firmware-version-updates
 
 Although the sensor's supply is 5V, its outputs are all 3.3V. This is because the onboard MCU runs at 3.3V, from its own on-board 3.3V LDO regulator. **So these sensors are safe to use with 3.3V MCUs :-)**
 
-To avoid complications it is recommended that these sensors are used only with 3.3V MCUs. 
+To avoid complications, it is recommended that these sensors are not used with old 5V MCUs. 
 
-The sensor's RX input is probably 5V-tolerant - but there is no mention of this in the documentation. To be safe, if you are using a 5V MCU, put a 10K resistor between the MCU's TX output and the sensor's RX input. This will also protect against "back-powering the sensor through the RX input's protection diode" if the sensor's 5V supply is disconnected while the MCU still has power. That could damage your board if more than (about) 1mA flows into the RX input.
+The sensor's RX input is probably 5V-tolerant - but there is no mention of this in the documentation. To be safe, if you must use a 5V MCU, put a 10K resistor between the 5V MCU's TX output and the sensor's RX input. This will also protect against back-powering the sensor through the sensor's RX input's protection diode, if the sensor's 5V supply is disconnected while the MCU still has power. That could damage your board if more than (about) 1mA flows into the RX input.
 
 > [!TIP]
 > A 10K resistor is particularly important if you are using a P-CH MOSFET to switch the sensor's power off/on to reset the sensor, because the `reboot()` command does not work. (I think I'll do that in the production version.) Or you could set the TX output to high impedance by configuring it as an INPUT while the sensor is powered off. \
@@ -46,11 +47,11 @@ If the MCU and the sensors are powered by 5V from the USB, then all is good. If 
 
 ## Serial Communications
 
-The sensors use serial communications at a fixed speed of 9600 baud. This is nice because it works well with either `SoftwareSerial` or `HardwareSerial`. With SoftwareSerial, you do not lose a serial port and (almost) any GPIOs can be used. SoftwareSerial must be interrupt-driven. 
+The sensors use serial communications at a fixed speed of 9600 bps. This is nice because it works well with either `SoftwareSerial` or `HardwareSerial`. With SoftwareSerial, you do not lose a serial port and (almost) any GPIOs can be used. SoftwareSerial must be interrupt-driven. 
 
 Once initialised, the sensor sends unsolicited _report_ messages one or more times a second to report the presence, motion, breathing and hearbeat states. These report messages must be regularly polled, as described below.
 
-Command messages can also be sent to the sensor, which returns a response if the command was successfully processed. If a command is sent at the wrong moment (e.g. while the sensor is sending a report message), it will often be ignored. The library detects this and re-sends the command (retries).
+Command messages can also be sent to the sensor, which returns a response if the command was successfully processed. If a command is sent at the wrong moment (e.g. while the sensor is sending a report message), it will often be ignored and there will be no response. The library detects this and re-sends the command (retries).
 
 All messages are binary (not ASCII characters), with a Modbus CRC-16 checksum for each message. 
 
@@ -80,9 +81,9 @@ The 30-second settling time starts immediatly after the reset. In some cases the
 
 After a power up or if an internal error is detected, the sensor first sends an "abnormal reset" report message, then goes into its initialization procedure. Once complete, it sends an "initialization successful" message. 
 
-This 30 second delay is not handled by this library. Instead, an `isReady()` method has been implemented.
+This 30 second delay is not handled by this library. Instead, an `isReady()` method has been implemented to handle the "abnormal reset" and "init successfuk" messages.
 
-Call `isReady()` at least every 200ms to wait for the "initialisation successful" message, as shown in the example sketch. During this period the sensor may not respond to commands and the report messages may contain invalid readings and even invalid CRCs. Sometimes it also sends undocumented report messages during this period.
+Call `isReady()` at least every 200ms to wait for the "initialisation successful" message, as shown in the example sketch. During this period the sensor may not respond to commands and the report messages may contain invalid readings and even invalid CRCs. Sometimes it sends undocumented report messages during this period.
 
 
 ## Polling the Sensor
@@ -96,7 +97,7 @@ Each character is validated by the `receiveByte()` state machine as it is receiv
 If a report message is lost, it usually does not matter because the state machine will re-synchronize and the next report message will be received correctly. If a command response is lost, the command is re-sent with up to two retries (three attempts).
 
 > [!TIP]
-> If your software hits a breakpoint, or delays too long between polls, bytes will be lost and communications errors will be reported. Howvere, the state machine will always re-sync and recover. \
+> If your software hits a breakpoint, or delays too long between polls, bytes will be lost and communications errors will be reported. However, the state machine will always re-sync and recover. \
 > Do not use a timer interrupt for polling, because communications methods will not work if called from an interrupt handler (in the Arduino environment).
 
 
@@ -129,11 +130,12 @@ void loop()
             static bool sensorConfigured = false;
             if (!sensorConfigured) {
                 sensorConfigured = true;
-                // these determine the communications behaviour
+
+                // these can be used to determine communications behaviour
                 sensor.readFirmwareVersion();
                 sensor.readProtocolVersion();
                 // we want to do sleep monitoring too
-                //sensor.enableSleepMonitoring(true);
+                //sensor.enableSleepMonitoring(true);	// do this once
                 sensor.readSleepMonitoring();
             }
         }
@@ -179,25 +181,39 @@ Use the `readXXX()` methods to read the current settings.
 
 ## Reboot Command
 
-A reboot or power up is probably needed after any of the settings are changed, but this is not specified in the documentation. 
+A reboot or power up may be needed after any of the settings are changed, but this is not specified in the documentation. 
 
 Unfortunately, the reboot command described in the manual does not work with my sensor. This could be because it has an old version of the firmware. 
 
-I asked about this on the product's Seeed Studio Wiki, but have received no replies so far.
-
 My firmware version is G24VD1SYV010105 (v1.1.5). According to an AI query, there was a version v1.1.6, but I can't find any information about it.
+
+I asked about this on the product's Seeed Studio Wiki, but have received no replies so far.
 
 > [!NOTE]
 > There will be an update if I find out more.
 
 
+## Heartbeat
+
+The Seeed Studio version reports a `heartbeatState` and a `heartbeatRate`, but the MicRadar version does not implement this. 
+
+Some mmWave sensors, which only send messages when something changes, implement a 'hearbeat' message which just informs the MCU that the sensor is still alive. This has nothing to do with a person's heartbeat.
+
+The MR24BSD1 seems to implement the actual person's actual heartbeat.
+
+But is it accurate?
+
+...
+<!-- TODO test it! -->
+
+
 ## Library Features
 
-* Supports all the features and messages described in the manual (depending on the firmware version).
+* This library supports all the features and messages described in the manual (depending on the firmware version).
 
-* Has callbacks for when the _occupied state_ or _sleep state_ changes. The _bed occupied state_ could be handled in the same way.
+* It has callbacks for when the _occupied state_ or _sleep state_ changes. The _bed occupied state_ could be handled in the same way.
 
-* Because these sensors may be used in critical environments (hospitals, nursing homes, funeral parlours, etc), additional features "sensor not responding" and "sensor not initialized" have been implemented.
+* Because these sensors may be used in critical environments (hospitals, nursing homes, brothels, funeral parlours, etc), additional "sensor not responding" and "sensor not initialized" features have been implemented.
 
 * Uses a simple state machine (6 states) for receiving and validating message frames from the sensor.
 
@@ -205,7 +221,7 @@ My firmware version is G24VD1SYV010105 (v1.1.5). According to an AI query, there
 
 * Has an `isReady()` method to determine of the sensor is initialized, is producing valid data, and is ready to receive commands. It is not ready until the "initialization successful" message has been received after the reset.
 
-* Provides all the sensor's data in a memory-optimised `MR24BSD1Properties` structure.
+* Maintains all the sensor's data in a memory-optimised `MR24BSD1Properties` structure.
 
 * Supports multiple sensors on different `SoftwareSerial` ports (depending on your MCU).
 
@@ -285,9 +301,9 @@ public:
     // All sensor data is maintained in this structure
     struct MR24BSD1Properties
     {
-        bool abnormalReset;             // device is initialising
-        bool initSuccessful;            // device is initialized, after "abnormal reset"
-        bool responding;
+        bool abnormalReset;             // sensor is initialising
+        bool initSuccessful;            // sensor is initialized, after "abnormal reset"
+        bool responding;                // sensor is sending messages (5 second timeout)
 
         // Sensor Readings from report messages
         OccupiedState occupiedState;    // (can also be read with readOccupiedState())
@@ -296,7 +312,7 @@ public:
         byte motionAmplitude;           // 0..100% (can also read with readMotionAmplitude())
         byte breathingRate;             // breaths per minute
         OccupiedState heartbeatState;   // occupied state of creature with heartbeat?
-        byte heartRate;                 // beats per minute
+        byte heartbeatRate;             // beats per minute
 
         //>>> Sleep State Monitoring, requires enableSleepMonitoring(true)
         bool sleepMonitoringEnabled;
@@ -382,25 +398,24 @@ public:
 
 ```
 
-
-
-<!-- Note 1) The MicRadar manual for the R24BDD1 version does not mention _heartrate monitoring_ anywhere. -->
-
-
-<!--
 ## Example Sketch
 
+[MR24BSD1mmWave-Example.ino](examples/MR24BSD1mmWave-Example/MR24BSD1mmWave-Example.ino)
 
-```cpp
-// when debugging, uncomment this to disable the 30 second startup delay
-// after the first power up
-ensor.properties.deviceReady = true;
-```
+The example sketch uses `#define DEBUG` to enable the debug output messages to the Serial Monitor on the `Serial` port. Comment out this statement to remove all the debug code.
 
--->
+The `MR24BSD1_PRINTxx(s)` macros are used to write debug messages to `Serial`. You can change these to use any serial port.
+
+The example uses PuTTY as the Serial Monitor. If not using PuTTY, you can comment out the escape sequence that clears the display.
+
+`Serial1` is used for communicating with the sensor. This is `HardwareSerial` (sometimes called `Uart`), but you can easily change it to `SoftwareSerial`. 
+
+The code in `loop()` shows how to use `isReady()` to determine when the sensor has initialized. If your are debugging (i.e. not powering the sensor off and on), then there is no need to call this method because the sensor will already be initialized. To disable it you can set `sensor.properties.deviceReady = true;`.
+
+It implements the `occupiedStateChanged` callback function, which is called whenever the occupied state changes. You could also add a callback for `sleepingStateChanged`.
+
 
 <!--
-
 ## Practical Tests
 
 Can we answer these existential questions?
@@ -410,8 +425,6 @@ What happens if there is more than one person in the bed? \
 Or there are ten people sleeping on the sofa? \
 What about people who are sleeping on the floor? \
 What about pets?
-
-
 
 vibrating objects
 
@@ -426,7 +439,6 @@ heartbeat
 breathing
 
 mounting the sensor under the bed
-
 -->
 
 
@@ -463,7 +475,7 @@ https://www.bestmodulescorp.com/en/amfile/file/download/file/1598/product/708
 I only found two other Arduino style libraries for these modules.
 
 **The library from the Seeed Studio Wiki page** \
-This does not do very much. \
+It does not do much. \
 https://github.com/limengdu/Seeed-Studio-MR24BSD1-Sensor
 
 **This one does a bit more** \
