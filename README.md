@@ -12,8 +12,8 @@ These mmWave boards are not only for presence detection. They have large radar a
 There is not much code available for these boards, so here is an Arduino-style C++ class (written by one of the few remaining human programmers, soon to be plagiarised by AI). It should be easy to adapt it for any architecture.
 
 > [!NOTE]
-> These boards are becoming obsolete, there are very few for sale. Maybe because there was no decent software for them. Until now ;-) \
-> I guess they are being replaced by the 60GHz versions.
+> These old boards are becoming obsolete, there are very few for sale. Maybe because there was no decent software for them. Until now ;-) \
+> I guess they are being replaced by the (more expensive) 60GHz versions.
 
 
 <!--
@@ -481,7 +481,7 @@ https://github.com/taunoe/Seeed-MR24BSD1
 
 | Date       | Version  | Notes        |
 |:---------- |:---------| :----------- |
-| 2026.11.27 | 0.0.0    | Preliminary  |
+| 2026.11.27 | 0.0.0    | Preliminary, from an old room controller project |
 
 <br/>
 
