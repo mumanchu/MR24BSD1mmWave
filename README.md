@@ -34,7 +34,7 @@ To avoid complications, it is recommended that these sensors are not used with o
 The sensor's RX input is probably 5V-tolerant - but there is no mention of this in the documentation. To be safe, if you must use a 5V MCU, put a 10K resistor between the 5V MCU's TX output and the sensor's RX input. This will also protect against back-powering the sensor through the sensor's RX input's protection diode, if the sensor's 5V supply is disconnected while the MCU still has power. That could damage your board if more than (about) 1mA flows into the RX input.
 
 > [!TIP]
-> A 10K resistor is particularly important if you are using a P-CH MOSFET to switch the sensor's power off/on to reset the sensor, because the `reboot()` command does not work. (I think I'll do that in the production version.) Or you could set the TX output to high impedance by configuring it as an INPUT while the sensor is powered off. \
+> A 10K resistor is particularly important if you are using a P-CH MOSFET to switch the sensor's power off/on to reset the sensor, because the `reboot()` command does not work. (That would be required for the production version.) Or you could set the TX output to high impedance by configuring it as an INPUT while the sensor is powered off. \
 > In fact, if you have long RX/TX wires that run outside the sensor's enclosure, it's good practice to put 10K resistors in both the TX and the RX lines at the MCU end. This reduces echoes on the lines and gives additional protection against ESD. 
 
 
@@ -472,10 +472,10 @@ https://www.bestmodulescorp.com/en/amfile/file/download/file/1598/product/708
 
 ## Other Libraries
 
-I only found two other Arduino style libraries for these modules.
+I found only two other Arduino style libraries for these modules.
 
 **The library from the Seeed Studio Wiki page** \
-It does not do much. \
+It does not do very much. \
 https://github.com/limengdu/Seeed-Studio-MR24BSD1-Sensor
 
 **This one does a bit more** \
