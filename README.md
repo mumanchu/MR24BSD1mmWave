@@ -446,7 +446,7 @@ mounting the sensor under the bed
 ## References
 
 **Seeed Studio MR24BSD1 Sleep Monitoring User Manual** \
-The title is 'R24BBD1', which is the MicRadar model number. This contains the protocol definition. \ 
+The title is 'R24BBD1', which is the MicRadar model number. This contains the protocol definition. \
 https://files.seeedstudio.com/wiki/mmWave-radar/MR24BSD1_User_Manual.pdf \
 (I would say this one is the "user manual", and the previous one is the "data sheet".) \
 https://files.seeedstudio.com/wiki/mmWave-radar/MR24BSD1_Datasheet.pdf
