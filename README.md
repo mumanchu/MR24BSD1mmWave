@@ -1,4 +1,4 @@
-# Arduino Library for MR24BSD1 and R24BBD1 mmWave Sleep Monitoring Sensors
+﻿# Arduino Library for MR24BSD1 and R24BBD1 mmWave Sleep Monitoring Sensors
 
 _Copyright (C) 2026, muman.ch + github.com/mumanchu_ \
 _Released under the terms of the BSD 3-Clause License_
@@ -197,9 +197,9 @@ I asked about this on the product's Seeed Studio Wiki, but have received no repl
 
 The Seeed Studio version reports a `heartbeatState` and a `heartbeatRate`, but the MicRadar version does not implement this. 
 
-Some mmWave sensors, which only send messages when something changes, implement a 'hearbeat' message which just informs the MCU that the sensor is still alive. This has nothing to do with a person's heartbeat.
+Some mmWave sensors, which only send messages when something changes, implement a 'hearbeat' message which just informs the MCU that the sensor is still alive. This has nothing to do with a person's actual heartbeat.
 
-The MR24BSD1 seems to implement the actual person's actual heartbeat.
+The MR24BSD1 seems to implement the person's actual heartbeat.
 
 But is it accurate?
 
