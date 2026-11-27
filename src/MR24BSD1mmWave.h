@@ -167,7 +167,6 @@ public:
 		SleepingState newState, SleepingState oldState) = NULL;
 
 	// TODO more notification callbacks could be added here
-	// (e.g. callback if heartbeat stops)
 
 	// Methods
 	MR24BSD1mmWave();
@@ -433,7 +432,7 @@ bool MR24BSD1mmWave::processReadModuleInfo()
 		break;
 	case 0x03:
 		// hardware version
-		// manual says its "8 byte data", it's 4 chars
+		// manual says "8 byte data", it's 4 chars
 		if (datalen != 4)
 			MR24BSD1_PRINTLN("bad datalen");
 		strncpy(properties.hardwareVersion, data, 4);
@@ -447,7 +446,7 @@ bool MR24BSD1mmWave::processReadModuleInfo()
 		properties.protocolVersion = rxMsg[6];
 		break;
 	default:
-		MR24BSD1_PRINTLN("unknown addsCode2");
+		MR24BSD1_PRINTLN("bad addsCode2");
 		return false;
 	}
 	return true;
@@ -468,7 +467,7 @@ bool MR24BSD1mmWave::processReadRadarInfo()
 		properties.motionAmplitude = (int)(*(float*)(rxMsg + 6));
 		break;
 	default:
-		MR24BSD1_PRINTLN("unknown addsCode2");
+		MR24BSD1_PRINTLN("bad addsCode2");
 		return false;
 	}
 	return true;
@@ -502,7 +501,7 @@ bool MR24BSD1mmWave::processReadParameter()
 		break;
 	*/
 	default:
-		MR24BSD1_PRINTLN("unknown addsCode2");
+		MR24BSD1_PRINTLN("bad addsCode2");
 		return false;
 	}
 	return true;
@@ -533,7 +532,7 @@ bool MR24BSD1mmWave::processOtherFunction()
 		// undocumented
 		break;
 	default:
-		MR24BSD1_PRINTLN("unknown addsCode2");
+		MR24BSD1_PRINTLN("bad addsCode2");
 		return false;
 	}
 	return true;
@@ -563,8 +562,9 @@ bool MR24BSD1mmWave::processProactiveReportMessage()
 			break;
 		}
 		case 0x06:
-			// motion amplitude, 0..100%
-			// there's no need for a float value, its value is 0..100%
+			// motion amplitude, 0..100%, this is returned every second
+			// there's no need for a float value, its value is 0..100% 
+			// in steps of 1
 			properties.motionAmplitude = (int)(*(float*)(rxMsg + 6));
 			break;
 		case 0x07:
@@ -573,7 +573,7 @@ bool MR24BSD1mmWave::processProactiveReportMessage()
 			// 01 01 02 = approaching
 			// 01 01 03 = moving away
 			// 01 01 04 = moving about
-			// 01 01 05 = ?
+			// 01 01 05 = ? undocumented
 			if (*(ushort*)(rxMsg + 6) != 0x0101 || rxMsg[8] > 5) {
 				MR24BSD1_PRINTLN("bad motionState");
 				return false;
@@ -637,6 +637,8 @@ bool MR24BSD1mmWave::processSleepReportMessage()
 		case 0x01:
 			// breathing rate
 			properties.breathingRate = rxMsg[6];
+			MR24BSD1_PRINT("breathingRate=");
+			MR24BSD1_PRINTLN(properties.breathingRate);
 			break;
 		case 0x04:
 			// breathing state
@@ -644,6 +646,8 @@ bool MR24BSD1mmWave::processSleepReportMessage()
 			// 2=no signal/unoccupied, 3=undocumented, 4=abnormal movement, 
 			// 5=rapid breathing/exercising
 			properties.breathingState = (BreathingState)rxMsg[6];
+			MR24BSD1_PRINT("breathingState=");
+			MR24BSD1_PRINTLN(properties.breathingState);
 			break;
 		default:
 			MR24BSD1_PRINTLN("bad addsCode2");
@@ -713,6 +717,8 @@ bool MR24BSD1mmWave::processSleepReportMessage()
 			return false;
 		}
 		properties.heartbeatRate = rxMsg[6];
+		MR24BSD1_PRINT("heartbeatRate=");
+		MR24BSD1_PRINTLN(properties.heartbeatRate);
 		break;
 	default:
 		MR24BSD1_PRINTLN("bad addsCode2");
@@ -791,10 +797,11 @@ bool MR24BSD1mmWave::pollMessage()
 bool MR24BSD1mmWave::receiveByte(byte b)
 {
 	#ifdef DEBUG
+	// display each byte received, in hex
 	if (b == 0x55 && rxState == 0)	// new line at start of message
 		MR24BSD1_PRINTLN("");
 	char buf[4];
-	sprintf(buf, "%02X ", b);		// display each byte received
+	sprintf(buf, "%02X ", b);
 	MR24BSD1_PRINT(buf);
 	#endif
 
