@@ -200,7 +200,7 @@ The Seeed Studio version reports a `heartbeatState` and a `heartbeatRate`, but t
 
 Some mmWave sensors, which only send messages when something changes, implement a 'hearbeat' message which just informs the MCU that the sensor is still alive. This has nothing to do with a person's actual heartbeat.
 
-The MR24BSD1 seems to implement the person's actual heartbeat.
+The MR24BSD1 seems to implement a person's actual heartbeat.
 
 But is it accurate?
 
@@ -359,7 +359,6 @@ public:
         SleepingState newState, SleepingState oldState) = NULL;
 
     // TODO more notification callbacks could be added here
-    // (e.g. callback if heartbeat stops)
 
     // Methods
     MR24BSD1mmWave();
@@ -403,17 +402,19 @@ public:
 
 [MR24BSD1mmWave-Example.ino](examples/MR24BSD1mmWave-Example/MR24BSD1mmWave-Example.ino)
 
-The example sketch uses `#define DEBUG` to enable the debug output messages to the Serial Monitor on the `Serial` port. Comment out this statement to remove all the debug code.
+The example sketch uses `#define DEBUG` to enable the debug output messages to the Serial Monitor via the `Serial` port. Comment out this statement to remove all the debug code.
 
 The `MR24BSD1_PRINTxx(s)` macros are used to write debug messages to `Serial`. You can change these to use any serial port.
 
 The example uses PuTTY as the Serial Monitor. If not using PuTTY, you can comment out the escape sequence that clears the display.
 
-`Serial1` is used for communicating with the sensor. This is `HardwareSerial` (sometimes called `Uart`), but you can easily change it to `SoftwareSerial`. 
+`SoftwareSerial SwSerial` is used for communicating with the mmWave sensor (it's only 9600 bps). Add the `SoftwareSerial` library to your sketch. A `HardwareSerial` port could be used, but then you cannot use it for anything else. 
 
-The code in `loop()` shows how to use `isReady()` to determine when the sensor has initialized. If your are debugging (i.e. not powering the sensor off and on), then there is no need to call this method because the sensor will already be initialized. To disable it you can set `sensor.properties.deviceReady = true;`.
+_The example sketch uses GPIO pins 2 (RX) and 8 (TX) for SoftwareSerial communications, you will probably need to change the pins for your own setup._
 
-It implements the `occupiedStateChanged` callback function, which is called whenever the occupied state changes. You could also add a callback for `sleepingStateChanged`.
+The code in `loop()` shows how to use `isReady()` to determine when the sensor has initialized. If your are debugging (i.e. not powering the MCU and sensor off and on), then there is no need to call this method every time because the sensor will already have been initialized. To disable it, uncomment the line `sensor.properties.deviceReady = true;`.
+
+It implements the `occupiedStateChanged` callback function, which is called whenever the occupied state changes. You could also add a callback for `sleepingStateChanged`, or any other state change.
 
 
 <!--
@@ -476,13 +477,14 @@ https://github.com/limengdu/Seeed-Studio-MR24BSD1-Sensor
 
 **This one does a bit more** \
 https://github.com/taunoe/Seeed-MR24BSD1
+<!-- But it's spoiled by `Serial.print()` statements in the code which must be patched out, and the handling of 32-bit `ulong` values could be improved. -->
 
 
 ## Revision History
 
 | Date       | Version  | Notes        |
 |:---------- |:---------| :----------- |
-| 2026.11.27 | 0.0.0    | Preliminary, adapted from an old room controller project |
+| 2026.11.27 | 0.0.0    | Preliminary, adapted from my old room controller project |
 
 <br/>
 
