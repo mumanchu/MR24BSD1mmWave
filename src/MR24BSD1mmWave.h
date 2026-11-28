@@ -3,7 +3,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Arduino Library for Seeed Studio MR24BSD1 mmWave Sleep Monitoring Sensor
 // also works for the MicRadar R24BBD1 
-// Copyright (C) https://muman.ch and https://github.com/mumanchu, 2026.11.27
+// Copyright (C) https://muman.ch and https://github.com/mumanchu, 2026.11.28
 // Released under the terms of the BSD 3-Clause License
 // If you re-use this software please include the above copyright notice
 // 
@@ -15,7 +15,8 @@ byte motionAmplitude
 ====================
 (the manual calls this the "signs parameter")
 Motion amplitude in percent, 0..100%
-Note: a float value is not needed, the value is 0..100% in steps of 1
+Note: The sensor returns a float value, but a float value is not 
+needed because the value is 0..100 in steps of 1.
 0        = unoccupied
 1        = stationary
 2..30    = micro movements
@@ -212,6 +213,7 @@ protected:
 	bool processProactiveReportMessage();
 	bool processSleepReportMessage();
 	OccupiedState getOccupiedStateFromRxMsg();
+	byte getMotionAmplitudeFromRxMsg();
 
 	bool receiveByte(byte b);
 	bool processMessage();
@@ -461,11 +463,11 @@ bool MR24BSD1mmWave::processReadRadarInfo()
 		// "environment status"
 		properties.occupiedState = getOccupiedStateFromRxMsg();
 		break;
-	case 0x06:
+	case 0x06: {
 		// motion amplitude, 0..100%
-		// there's no need for a float value, it's 0..100 in steps of 1
-		properties.motionAmplitude = (int)(*(float*)(rxMsg + 6));
+		properties.motionAmplitude = getMotionAmplitudeFromRxMsg();
 		break;
+		}
 	default:
 		MR24BSD1_PRINTLN("bad addsCode2");
 		return false;
@@ -561,12 +563,11 @@ bool MR24BSD1mmWave::processProactiveReportMessage()
 			}
 			break;
 		}
-		case 0x06:
+		case 0x06: {
 			// motion amplitude, 0..100%, this is returned every second
-			// there's no need for a float value, its value is 0..100% 
-			// in steps of 1
-			properties.motionAmplitude = (int)(*(float*)(rxMsg + 6));
+			properties.motionAmplitude = getMotionAmplitudeFromRxMsg();
 			break;
+		}
 		case 0x07:
 			// "approaching away state" = direction state
 			// 01 01 01 = none
@@ -744,6 +745,18 @@ MR24BSD1mmWave::OccupiedState MR24BSD1mmWave::getOccupiedStateFromRxMsg()
 	}
 	MR24BSD1_PRINTLN("bad occupiedState");
 	return OccupiedState::Unoccupied;
+}
+
+// There's no need for a float value, its value is 0..100% in steps of 1
+byte MR24BSD1mmWave::getMotionAmplitudeFromRxMsg()
+{
+	float f = *(float*)(rxMsg + 6);
+	uint i = (uint)f;
+	if (f < 0.0f)
+		i = 0;
+	if (f > 100.0f)
+		i = 100;
+	return(byte)i;
 }
 
 
