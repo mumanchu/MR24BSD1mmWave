@@ -747,16 +747,15 @@ MR24BSD1mmWave::OccupiedState MR24BSD1mmWave::getOccupiedStateFromRxMsg()
 	return OccupiedState::Unoccupied;
 }
 
-// There's no need for a float value, its value is 0..100% in steps of 1
+// There's no need for a float value, its value is 0..100 in steps of 1
 byte MR24BSD1mmWave::getMotionAmplitudeFromRxMsg()
 {
 	float f = *(float*)(rxMsg + 6);
-	uint i = (uint)f;
 	if (f < 0.0f)
-		i = 0;
+		return 0;
 	if (f > 100.0f)
-		i = 100;
-	return(byte)i;
+		return 100;
+	return (byte)(uint)f;
 }
 
 
