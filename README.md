@@ -3,9 +3,11 @@
 _Copyright (C) 2026, muman.ch + github.com/mumanchu_ \
 _Released under the terms of the BSD 3-Clause License_
 
-** **PRELIMINARY** ** _Subject to change without noticing_
+** **PRELIMINARY** ** 
 
-There are two versions of this 24GHz mmWave board. The "MR24BSD1" is the Seeed Studio version, and the "R24BBD1" is the original MicRadar version. The Seeed Studio manual has the MicRadar model number 'R24BBD1' on its cover, so I guess they are the same board. They may contain different firmware, but I'm still waiting for my MicRadar board to arrive.
+There are two versions of this 24GHz mmWave board. The "MR24BSD1" is the Seeed Studio version, and the "R24BBD1" is the original MicRadar version. The Seeed Studio manual has the MicRadar model number 'R24BBD1' on its cover, so I guess they are the same board. 
+
+They may contain different firmware, but I'm still waiting for my MicRadar board to arrive.
 
 <img height="500" alt="R24 mmWave boards" src="images/R24-boards.jpg" />
 
@@ -40,7 +42,7 @@ If the MCU and the sensors are powered by 5V from the USB, then all is good. If 
 
 ## Serial Communications
 
-The sensors use serial communications at a fixed speed of 9600 bps. This is nice because it works well with either `SoftwareSerial` or `HardwareSerial`. With SoftwareSerial, you do not lose a serial port and (almost) any GPIOs can be used. SoftwareSerial must be interrupt-driven. 
+The sensors use serial communications at a fixed speed of 9600 bps. This is nice because it works well with either `SoftwareSerial` or `HardwareSerial`. With SoftwareSerial, you do not lose a serial port and (almost) any GPIOs can be used. 
 
 Once initialised, the sensor sends unsolicited _report_ messages one or more times a second to report the presence, motion, breathing and hearbeat states. These report messages must be regularly polled, as described below.
 
@@ -141,7 +143,7 @@ void loop()
 
 The settings are stored in nonvolatile memory, so they only need to be programmed once. 
 
-Because the sensor has a start-up period, you may not be able to configure it in `setup()`. Wait until `isReady()` returns `true` before calling any of the `writeXXX()` commands. One way to do this is shown in the example sketch.
+Because the sensor has a start-up period, you may not be able to configure it in `setup()`. Wait until `isReady()` returns `true` before calling any of the `writeXXX()` commands. This is shown in the example sketch.
 
 After configuration, the sensor probably needs a power-up reset or a reboot, but this is not specified in the documentation. 
 
@@ -198,6 +200,23 @@ But is it accurate?
 <!-- TODO test it! -->
 
 
+## Motion Amplitude
+
+The motion amplitude is returned as a report message every 5 seconds. 
+
+This is a value beteen 0 and 100 which indicates the strength of the detected movement. Small values mean less moveemnt, large vales mean faster or larger movements. 
+
+The message from the sensor contains a 32-bit floating point value, but a `float` value is not needed because the value is 0..100 in steps of 1. The library converts this to an 8-bit integer.
+
+```
+0        = unoccupied
+1        = stationary
+2..30    = micro movements
+31..60   = walking or fast movements
+61..100  = running or large close-range movements
+```
+
+
 <!-- TODO
 ## Firmware Versions and Updating the Firmware
 
@@ -232,7 +251,7 @@ https://wiki.seeedstudio.com/Radar_MR24HPC1/#firmware-version-updates
 
 ## Installing the Library
 
-Download the latest ZIP file with green button on this library's Github screen, "<> Code / Download Zip". This downloads a file called "MR24BSD1mmWave-main.zip" into your Downloads directory.
+Download the latest ZIP file by pressing green button on this library's Github page, "<> Code / Download Zip". This downloads a file called "MR24BSD1mmWave-main.zip" into your Downloads directory.
 
 You can just unzip this file and access the source coude in `src` and the example sketch in `examples\MR24BSD1mmWave-Example\MR24BSD1mmWave-Example.ino`. Copy the files in `src` into the example sketch directory and open the sketch.
 
@@ -248,6 +267,7 @@ To open the example sketch, select menu item "File > Examples" and scroll down b
 Full descriptions of each method can be found in the source code [MR24BSD1mmWave.h](src/MR24BSD1mmWave.h). The descriptions are not duplicated here.
 
 The library is in a single include file, not in two separate `.h` and `.cpp` files. This is fine if you want to access the class from a single source file, which is the usual case. If you need to access it from more than one source file, then move the code into its own `.cpp` file.
+
 
 ```cpp
 class MR24BSD1mmWave
