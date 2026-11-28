@@ -1,7 +1,7 @@
 ///////////////////////////////////////////////////////////////////////////////
 // Example Sketch for Arduino Library for Seeed Studio MR24BSD1 mmWave 
 // Sleep Monitoring Sensor, also works for the MicRadar R24BBD1
-// Copyright (C) https://muman.ch + https://github.com/mumanchu, 2026.11.27
+// Copyright (C) https://muman.ch + https://github.com/mumanchu, 2026.11.28
 // Released under the terms of the BSD 3-Clause License
 // If you re-use this software please include the above copyright notice
 // 
