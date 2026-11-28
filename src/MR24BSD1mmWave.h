@@ -496,12 +496,11 @@ bool MR24BSD1mmWave::processReadParameter()
 		// 0=none, 1=10s, 2=30s, 3=1min, 4=2min, 5=5min, 6=10min, 7=30min, 8=60min
 		properties.unoccupiedDelay = b;
 		break;
-	/*never occurs, readSleepMonitoring() is handled by processOtherFunction()
 	case 0x0D:
 		// sleep function switch
+		// never occurs, readSleepMonitoring() is handled by processOtherFunction()
 		properties.sleepMonitoringEnabled = b;
 		break;
-	*/
 	default:
 		MR24BSD1_PRINTLN("bad addsCode2");
 		return false;
@@ -530,8 +529,8 @@ bool MR24BSD1mmWave::processOtherFunction()
 	case 0x0B:
 	case 0x0C:
 	case 0x0E:
-		// these are returned after an <abnormal reset>
 		// undocumented
+		// these are returned after an <abnormal reset>
 		break;
 	default:
 		MR24BSD1_PRINTLN("bad addsCode2");
@@ -629,6 +628,7 @@ bool MR24BSD1mmWave::processSleepReportMessage()
 {
 	byte addsCode1 = rxMsg[4];
 	byte addsCode2 = rxMsg[5];
+	byte b = rxMsg[6];
 	ulong value = 0;
 
 	switch (addsCode1) {
@@ -637,7 +637,7 @@ bool MR24BSD1mmWave::processSleepReportMessage()
 		switch (addsCode2) {
 		case 0x01:
 			// breathing rate
-			properties.breathingRate = rxMsg[6];
+			properties.breathingRate = b;
 			MR24BSD1_PRINT("breathingRate=");
 			MR24BSD1_PRINTLN(properties.breathingRate);
 			break;
@@ -646,7 +646,7 @@ bool MR24BSD1mmWave::processSleepReportMessage()
 			// 0=normal, 1=not breathing ("abnormal suffocation"!), 
 			// 2=no signal/unoccupied, 3=undocumented, 4=abnormal movement, 
 			// 5=rapid breathing/exercising
-			properties.breathingState = (BreathingState)rxMsg[6];
+			properties.breathingState = (BreathingState)b;
 			MR24BSD1_PRINT("breathingState=");
 			MR24BSD1_PRINTLN(properties.breathingState);
 			break;
@@ -661,13 +661,13 @@ bool MR24BSD1mmWave::processSleepReportMessage()
 		case 0x07:
 			// in/out of bed
 			// 0x00=not in bed, 0x01=in bed, 0x02=bed state not available
-			properties.bedOccupiedState = (BedOccupiedState)rxMsg[6];
+			properties.bedOccupiedState = (BedOccupiedState)b;
 			break;
 		case 0x08: {
 			// sleep state
 			// 0x00=awake, 0x01=light sleep, 0x02=deep sleep, 0x03=not available
 			SleepingState oldState = properties.sleepingState;
-			properties.sleepingState = (SleepingState)rxMsg[6];
+			properties.sleepingState = (SleepingState)b;
 			// notify on sleeping state state change
 			if (oldState != properties.sleepingState) {
 				if (sleepingStateChangedCallback != NULL) {
@@ -709,7 +709,7 @@ bool MR24BSD1mmWave::processSleepReportMessage()
 			MR24BSD1_PRINTLN("bad addsCode2");
 			return false;
 		}
-		properties.sleepQuality = rxMsg[6];
+		properties.sleepQuality = b;
 		break;
 	case 0x06:
 		// heart rate monitor
@@ -717,7 +717,7 @@ bool MR24BSD1mmWave::processSleepReportMessage()
 			MR24BSD1_PRINTLN("bad addsCode2");
 			return false;
 		}
-		properties.heartbeatRate = rxMsg[6];
+		properties.heartbeatRate = b;
 		MR24BSD1_PRINT("heartbeatRate=");
 		MR24BSD1_PRINTLN(properties.heartbeatRate);
 		break;
