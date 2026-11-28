@@ -202,9 +202,9 @@ But is it accurate?
 
 ## Motion Amplitude
 
-The motion amplitude is returned as a report message every 5 seconds. 
+The motion amplitude is returned as a report message about once a second. 
 
-This is a value beteen 0 and 100 which indicates the strength of the detected movement. Small values mean less moveemnt, large vales mean faster or larger movements. 
+This is a value between 0 and 100 which indicates the strength of the detected movement. Small values mean less movement, large values mean faster or larger movements. 
 
 The message from the sensor contains a 32-bit floating point value, but a `float` value is not needed because the value is 0..100 in steps of 1. The library converts this to an 8-bit integer.
 
@@ -504,7 +504,7 @@ https://github.com/taunoe/Seeed-MR24BSD1
 
 | Date       | Version  | Notes        |
 |:---------- |:---------| :----------- |
-| 2026.11.27 | 0.0.0    | Preliminary, adapted from my old room controller project |
+| 2026.11.28 | 0.0.0    | Preliminary, adapted from my old room controller project |
 
 <br/>
 
